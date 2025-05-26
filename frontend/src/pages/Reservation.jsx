@@ -11,6 +11,7 @@ import MuiAlert from '@mui/material/Alert';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 const ReservationPage = () => {
   const [car, setCar] = useState(null);
@@ -29,6 +30,7 @@ const ReservationPage = () => {
   const [formVisible, setFormVisible] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const navigate = useNavigate();
+  const [touched, setTouched] = useState(false);
 
   useEffect(() => {
     const selected = localStorage.getItem('selectedCar');
@@ -47,10 +49,12 @@ const ReservationPage = () => {
 
   useEffect(() => {
     localStorage.setItem('reservationForm', JSON.stringify(form));
-    const validationErrors = validate(form);
-    setErrors(validationErrors);
-    setFormReady(Object.keys(validationErrors).length === 0);
-  }, [form]);
+    if (touched) {
+      const validationErrors = validate(form);
+      setErrors(validationErrors);
+      setFormReady(Object.keys(validationErrors).length === 0);
+    }
+  }, [form, touched]);
 
   const validate = (data) => {
     const newErrors = {};
@@ -62,6 +66,7 @@ const ReservationPage = () => {
   };
 
   const handleChange = (e) => {
+    setTouched(true);
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -105,78 +110,167 @@ const ReservationPage = () => {
   }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 10 }}>
-      <Typography variant="h5" gutterBottom>
-        Reservation: {car.brand} {car.carModel} ({car.carType})
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Year: {car.yearOfManufacture} | Fuel: {car.fuelType} | Mileage: {car.mileage} | Price: ${car.pricePerDay}/day
-      </Typography>
+    <>
+      <Navbar />
+      <Container maxWidth="sm" sx={{ mt: 10 }}>
+        <Typography variant="h5" gutterBottom>
+          Reservation: {car.brand} {car.carModel} ({car.carType})
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Year: {car.yearOfManufacture} | Fuel: {car.fuelType} | Mileage: {car.mileage} | Price: ${car.pricePerDay}/day
+        </Typography>
 
-      {!formVisible && !submitted && (
-        <Typography sx={{ mt: 2 }} color="error">This car is no longer available. Please choose another one.</Typography>
-      )}
+        {!formVisible && !submitted && (
+          <Typography sx={{ mt: 2 }} color="error">This car is no longer available. Please choose another one.</Typography>
+        )}
 
-      {submitted ? (
-        <>
-          <Typography variant="h6" color="success.main">Reservation submitted!</Typography>
-          <Button
-            variant="contained"
-            sx={{ mt: 2 }}
-            href={`/confirm/${orderId}`}
-          >
-            Click here to confirm your booking
-          </Button>
-        </>
-      ) : (
-        formVisible && (
-          <Grid container spacing={2} sx={{ mt: 2 }}>
-            <Grid item xs={12}><TextField fullWidth name="name" label="Full Name" value={form.name} onChange={handleChange} error={!!errors.name} helperText={errors.name} /></Grid>
-            <Grid item xs={12}><TextField fullWidth name="phoneNumber" label="Phone Number" value={form.phoneNumber} onChange={handleChange} error={!!errors.phoneNumber} helperText={errors.phoneNumber} /></Grid>
-            <Grid item xs={12}><TextField fullWidth name="email" label="Email" value={form.email} onChange={handleChange} error={!!errors.email} helperText={errors.email} /></Grid>
-            <Grid item xs={12}><TextField fullWidth name="driversLicenseNumber" label="Driver's License" value={form.driversLicenseNumber} onChange={handleChange} error={!!errors.driversLicenseNumber} helperText={errors.driversLicenseNumber} /></Grid>
-            <Grid item xs={6}><TextField fullWidth name="startDate" label="Start Date" type="date" value={form.startDate} onChange={handleChange} InputLabelProps={{ shrink: true }} /></Grid>
-            <Grid item xs={6}><TextField fullWidth name="rentalPeriod" label="Rental Days" type="number" value={form.rentalPeriod} onChange={handleChange} /></Grid>
-            <Grid item xs={12}>
-              <Typography fontWeight={600} sx={{ mb: 1 }}>
-                Total Price: ${form.rentalPeriod * car.pricePerDay}
-              </Typography>
-              <Button
-                variant="contained"
-                fullWidth
-                onClick={handleSubmit}
-                disabled={!formReady}
-              >
-                Submit Reservation
-              </Button>
+        {submitted ? (
+          <>
+            <Typography variant="h6" color="success.main">Reservation submitted!</Typography>
+            <Button
+              variant="contained"
+              sx={{ mt: 2 }}
+              onClick={() => {
+                axios.post(`${process.env.REACT_APP_API}/api/orders/confirm/${orderId}`)
+                  .then(() => {
+                    navigate('/', {
+                      state: { successMessage: 'Booking confirmed successfully!' }
+                    });
+                  })
+                  .catch((err) => {
+                    console.error('Confirmation failed:', err);
+                    alert('Failed to confirm booking. Please try again.');
+                  });
+              }}
+            >
+              Click here to confirm your booking
+            </Button>
+
+          </>
+        ) : (
+          formVisible && (
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  sx={{width: 250}}
+                  name="name"
+                  label="Full Name"
+                  value={form.name}
+                  onChange={handleChange}
+                  error={!!errors.name}
+                  helperText={errors.name}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  sx={{width: 250}}
+                  name="phoneNumber"
+                  label="Phone Number"
+                  value={form.phoneNumber}
+                  onChange={handleChange}
+                  error={!!errors.phoneNumber}
+                  helperText={errors.phoneNumber}
+                />
+              </Grid>
+
+              {/* Email and License in one row */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  sx={{width: 250}}
+                  name="email"
+                  label="Email"
+                  value={form.email}
+                  onChange={handleChange}
+                  error={!!errors.email}
+                  helperText={errors.email}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  sx={{width: 250}}
+                  name="driversLicenseNumber"
+                  label="Driver's License"
+                  value={form.driversLicenseNumber}
+                  onChange={handleChange}
+                  error={!!errors.driversLicenseNumber}
+                  helperText={errors.driversLicenseNumber}
+                />
+              </Grid>
+
+              {/* Start Date and Rental Period with Total Price */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  sx={{width: 250}}
+                  name="startDate"
+                  label="Start Date"
+                  type="date"
+                  value={form.startDate}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <TextField
+                  sx={{width: 250}}
+                  name="rentalPeriod"
+                  label="Rental Days"
+                  type="number"
+                  value={form.rentalPeriod}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid container flexDirection="column">
+                <Typography fontWeight={600}>
+                  Total: ${form.rentalPeriod * car.pricePerDay}
+                </Typography>
+              {/* Buttons */}
+              <Grid container flexDirection="row">
+                <Grid item xs={12} sm={6}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  sx={{width: 100}}
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </Button>
+                </Grid>
+              <Grid item xs={12} sm={6}>
+                <Button
+                  variant="contained"
+                  sx={{width: 100}}
+                  onClick={handleSubmit}
+                  disabled={!formReady}
+                >
+                  Submit
+                </Button>
+              </Grid>
+              </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <Button variant="outlined" color="error" fullWidth onClick={handleCancel}>
-                Cancel and Return to Homepage
-              </Button>
-            </Grid>
-          </Grid>
-        )
-      )}
+          )
 
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={2000}
-        onClose={() => setOpenSnackbar(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        sx={{ mt: '64px', mr: '16px' }}
-      >
-        <MuiAlert
+        )}
+
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={2000}
           onClose={() => setOpenSnackbar(false)}
-          severity="success"
-          variant="filled"
-          elevation={6}
-          sx={{ border: 1, borderRadius: '10px' }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          sx={{ mt: '64px', mr: '16px' }}
         >
-          Reservation complete. Please confirm.
-        </MuiAlert>
-      </Snackbar>
-    </Container>
+          <MuiAlert
+            onClose={() => setOpenSnackbar(false)}
+            severity="success"
+            variant="filled"
+            elevation={6}
+            sx={{ border: 1, borderRadius: '10px' }}
+          >
+            Reservation complete. Please confirm.
+          </MuiAlert>
+        </Snackbar>
+      </Container>
+    </>
   );
 };
 

@@ -12,13 +12,28 @@ import {
 import MuiAlert from '@mui/material/Alert';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const CarHomePage = () => {
   const [cars, setCars] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const [confirmationMessage, setConfirmationMessage] = useState(location.state?.successMessage || '');
+  const [selectedType, setSelectedType] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const carTypes = [...new Set(cars.map(c => c.carType))];
+  const carBrands = [...new Set(cars.map(c => c.brand))];
+
+
+  useEffect(() => {
+    if (location.state?.successMessage) {
+      setOpenSnackbar(true);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API}/api/cars`)
@@ -35,7 +50,10 @@ const CarHomePage = () => {
       car.carModel.toLowerCase().includes(safeSearch) ||
       car.carType.toLowerCase().includes(safeSearch);
 
-    return !searchQuery || matchesSearch;
+    const matchesType = !selectedType || car.carType === selectedType;
+    const matchesBrand = !selectedBrand || car.brand === selectedBrand;
+
+    return matchesSearch && matchesType && matchesBrand;
   });
 
   const handleRentClick = (car) => {
@@ -53,16 +71,44 @@ const CarHomePage = () => {
           inputValue={searchQuery}
           onInputChange={(e, value) => setSearchQuery(value)}
           onChange={(e, value) => value && setSearchQuery(value)}
-          sx={{ width: 400, mb: 4, border: 2, borderRadius: '10px' }}
+          sx={{ width: 400, mb: 4, border: 2, borderRadius: '5px' }}
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Search cars by type, brand, or model..."
-              variant="outlined"
+              placeholder="Search cars by type, brand, or model..."
               size="small"
             />
           )}
         />
+        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+          <Autocomplete
+            options={carTypes}
+            value={selectedType}
+            onChange={(e, value) => setSelectedType(value || '')}
+            renderInput={(params) => <TextField {...params} label="Car Type" size="small" />}
+            sx={{ width: 200 }}
+          />
+
+          <Autocomplete
+            options={carBrands}
+            value={selectedBrand}
+            onChange={(e, value) => setSelectedBrand(value || '')}
+            renderInput={(params) => <TextField {...params} label="Brand" size="small" />}
+            sx={{ width: 200 }}
+          />
+
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setSelectedType('');
+              setSelectedBrand('');
+              setSearchQuery('');
+            }}
+          >
+            Clear Filters
+          </Button>
+        </Box>
+
         <Grid container spacing={6}>
           {filteredCars.map((car) => (
             <Grid item key={car.vin}>
@@ -89,8 +135,8 @@ const CarHomePage = () => {
                     src={car.image || `/images/${car.vin}.jpg`}
                     alt={car.carModel}
                     style={{
-                      width: '80px',
-                      height: '80px',
+                      width: '180px',
+                      height: '100px',
                       objectFit: 'cover',
                       borderRadius: '8px',
                     }}
@@ -122,12 +168,13 @@ const CarHomePage = () => {
                   size="small"
                   sx={{
                     fontWeight: 600,
-                    backgroundColor: car.available ? '#95c944' : 'grey.400',
+                    backgroundColor: car.available ? '#FFF' : 'grey.400',
                     '&:hover': {
-                      backgroundColor: car.available ? '#608423' : 'grey.500',
+                      backgroundColor: car.available ? '#ff9696' : 'grey.500',
                     },
                     border: 1,
-                    color: 'black'
+                    color: 'black',
+                    boxShadow: '0px 2px 4px #ff9696'
                   }}
                   disabled={!car.available}
                   onClick={() => handleRentClick(car)}
@@ -153,10 +200,11 @@ const CarHomePage = () => {
           elevation={6}
           sx={{ border: 1, borderRadius: '10px' }}
         >
-          Rent clicked!
+          {confirmationMessage || 'Rent clicked!'}
         </MuiAlert>
+
       </Snackbar>
-          </>
+    </>
   );
 };
 

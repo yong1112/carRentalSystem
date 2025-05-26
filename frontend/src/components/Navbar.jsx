@@ -24,13 +24,11 @@ const Navbar = () => {
                     px: 2,
                 }}
             >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }} onClick={() => navigate("/")}>
                     <img src={logo} alt="Vroom Logo" style={{ height: '45px', marginRight: '10px' }} />
                     <Typography
                         variant="h6"
                         noWrap
-                        component={Link}
-                        to="/"
                         sx={{
                             textDecoration: 'none',
                             color: '#000',
@@ -38,22 +36,25 @@ const Navbar = () => {
                             fontSize: { xs: '1rem', sm: '1.25rem' },
                         }}
                     >
-                        Vroom Car Rental
+                        Car Rental
                     </Typography>
                 </Box>
                 <Box sx={{ marginLeft: 'auto' }}>
                     <Button
-                        variant="contained"
                         size="small"
                         onClick={handleReservationClick}
-                        sx={{ textTransform: 'none', fontWeight: 600, color: '#fff'}}
+                        sx={{ fontWeight: 600,
+                            border: 2, 
+                            borderColor: 'black', 
+                            width: '200px', 
+                            color: 'black',
+                            boxShadow: '0px 2px 4px #ff9696',
+                            '&:hover': { backgroundColor: '#ff9696' }}}
                     >
                         Reservation
                     </Button>
                 </Box>
             </Toolbar>
-
-
         </AppBar>
     );
 };
