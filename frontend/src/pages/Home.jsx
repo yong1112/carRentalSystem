@@ -86,7 +86,7 @@ const CarHomePage = () => {
             value={selectedType}
             onChange={(e, value) => setSelectedType(value || '')}
             renderInput={(params) => <TextField {...params} label="Car Type" size="small" />}
-            sx={{ width: 200 }}
+            sx={{ width: 200, mb: 4, borderRadius: '5px' }}
           />
 
           <Autocomplete
@@ -94,11 +94,11 @@ const CarHomePage = () => {
             value={selectedBrand}
             onChange={(e, value) => setSelectedBrand(value || '')}
             renderInput={(params) => <TextField {...params} label="Brand" size="small" />}
-            sx={{ width: 200 }}
+            sx={{ width: 200, mb: 4, borderRadius: '5px' }}
           />
 
           <Button
-            variant="outlined"
+            sx={{ width: 200, mb: 4, border: 2, borderRadius: '5px' }}
             onClick={() => {
               setSelectedType('');
               setSelectedBrand('');
@@ -172,7 +172,7 @@ const CarHomePage = () => {
                     '&:hover': {
                       backgroundColor: car.available ? '#ff9696' : 'grey.500',
                     },
-                    border: 1,
+                    border: 2,
                     color: 'black',
                     boxShadow: '0px 2px 4px #ff9696'
                   }}
