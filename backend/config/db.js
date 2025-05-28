@@ -1,12 +1,12 @@
 const sql = require('mssql');
 
 const config = {
-  user: 'carRental',         // 👈 your SQL Server login
-  password: 'yong123',     // 👈 your SQL Server password
-  server: 'localhost',           // or your DB host
-  database: 'carRental',        // 👈 your database name
+  user: 'admin',       
+  password: 'Yong1234',     
+  server: 'db.cxh6bhwtgrow.us-east-1.rds.amazonaws.com',        
+  database: 'carRental',       
   options: {
-    encrypt: false,              // true if you're using Azure
+    encrypt: false,           
     trustServerCertificate: true
   }
 };
