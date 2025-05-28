@@ -96,4 +96,25 @@ router.post('/orders/confirm/:orderId', async (req, res) => {
   }
 });
 
+// GET /api/orders/:orderId
+router.get('/orders/:orderId', async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const { orderId } = req.params;
+
+    const result = await pool.request()
+      .input('orderId', sql.UniqueIdentifier, orderId)
+      .query('SELECT * FROM Orders WHERE orderId = @orderId');
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    res.json(result.recordset[0]); // Send full order object
+  } catch (err) {
+    console.error('Error fetching order:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

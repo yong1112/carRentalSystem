@@ -57,7 +57,7 @@ const CarHomePage = () => {
   });
 
   const handleRentClick = (car) => {
-    localStorage.setItem('selectedCar', JSON.stringify(car));
+    sessionStorage.setItem('selectedCar', JSON.stringify(car));
     navigate('/reservation');
   };
 
