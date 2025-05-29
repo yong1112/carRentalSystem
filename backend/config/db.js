@@ -1,12 +1,13 @@
 const sql = require('mssql');
 
 const config = {
-  user: 'admin',       
-  password: 'Yong1234',     
-  server: 'db.cxh6bhwtgrow.us-east-1.rds.amazonaws.com',        
-  database: 'carRental',       
+  user: 'admin',
+  password: 'Yong1234',
+  server: 'db.cxh6bhwtgrow.us-east-1.rds.amazonaws.com',
+  database: 'carRental',
+  port: 1433, 
   options: {
-    encrypt: false,           
+    encrypt: true, 
     trustServerCertificate: true
   }
 };

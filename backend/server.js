@@ -13,3 +13,8 @@ app.use('/api', apiRoutes);
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://car-rental-frontend-yong.s3-website-us-east-1.amazonaws.com' 
+}));
